@@ -41,10 +41,7 @@ export class PupJump extends Component {
     this.currentTime;
 
     this.shiftThreshold = (3 / 4) * this.state.screen.height;
-    this.worldShift = 0;
-
     this.maxPlatform = null;
-
     this.rand = new RandNum();
   }
 
@@ -93,6 +90,8 @@ export class PupJump extends Component {
   }
 
   init () {
+    this.worldShift = 0;
+
     let w = this.state.screen.width;
     let h = this.state.screen.height;
     this.setState({
@@ -130,7 +129,9 @@ export class PupJump extends Component {
     if (delta < 0.2) { // don't update if delta too large, e.g. tabbing in
       this.scrollUp(delta);
       this.checkCollisions(delta);
-      this.pup.update(state, delta);
+      if (!this.pup.update(state, delta)) {
+        this.init();
+      }
       this.updatePlatforms(state, delta);
     }
 
@@ -147,6 +148,9 @@ export class PupJump extends Component {
   }
 
   scrollUp(delta) {
+    if (this.pup.top < this.state.screen.height / 4) {
+      this.worldShift = this.shiftThreshold - this.pup.top;
+    }
     if (this.worldShift > 0) {
       let modifier = (
         (this.shiftThreshold + this.worldShift) / this.shiftThreshold
@@ -201,14 +205,17 @@ export class PupJump extends Component {
 
     if (x0 < this.state.screen.width / 4) dx = Math.abs(dx);
     else if (x0 > (3/4) * this.state.screen.width) dx = -Math.abs(dx);
+    let type = Math.random() > .25 ? 'normal' : 'boost';
     let newPlat = new Platform({
       pos: {
         x: x0 + dx,
         y: y0 - dy
-      }
+      },
+      type: type
     });
 
-    if (newPlat.top < this.maxPlatform.top) this.maxPlatform = newPlat;
+    if (newPlat.top < this.maxPlatform.top)
+      this.maxPlatform = newPlat;
 
     this.platforms.push(newPlat);
   }

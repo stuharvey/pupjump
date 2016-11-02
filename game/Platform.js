@@ -5,6 +5,7 @@ const FALL_SPEED = 200;
 export default class Platform extends Rectangle {
   constructor (args) {
     super(args.pos.x, args.pos.y, Platform.WIDTH, Platform.HEIGHT);
+    this.type = args.type;
     this.falling = false;
   }
 
@@ -30,7 +31,7 @@ export default class Platform extends Rectangle {
   }
 
   static get MIN_Y_SEP () {
-    return 50;
+    return 20;
   }
 
   update (state, delta) {
@@ -47,7 +48,10 @@ export default class Platform extends Rectangle {
   draw (state) {
     const ctx = state.ctx;
     ctx.save();
-    ctx.fillStyle = '#000';
+    if (this.type === 'boost')
+      ctx.fillStyle = 'blue';
+    else
+      ctx.fillStyle = '#000';
     ctx.fillRect(this.left, this.top, this.w, this.h);
     ctx.restore();
   }

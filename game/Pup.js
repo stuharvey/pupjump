@@ -1,6 +1,6 @@
 const GRAVITY = 25;
-const MOVE_SPEED = 300;
-const JUMP_SPEED = -750;
+const MOVE_SPEED = 400;
+const JUMP_SPEED = -850;
 
 export default class Pup {
   constructor (args) {
@@ -32,10 +32,11 @@ export default class Pup {
   }
 
   update (state, delta) {
-    this.checkBoundaries(state.screen.width, state.screen.height);
+    let alive = this.checkBoundaries(state.screen.width, state.screen.height);
     this.updateVelocities(state.keysPressed);
     this.updatePosition(delta);
     this.draw(state.ctx);
+    return alive;
   }
 
   updateVelocities (keys) {
@@ -77,7 +78,8 @@ export default class Pup {
     let above = this.pos.y <= platform.top;
     if (intersects && falling && above) {
       this.jumping = true;
-      this.v.y = JUMP_SPEED;
+      let modifier = platform.type === 'boost' ? 1.75 : 1;
+      this.v.y = modifier * JUMP_SPEED;
       platform.falling = true;
       return true;
     }
@@ -96,11 +98,9 @@ export default class Pup {
     }
 
     if (this.bottom >= h) {
-      this.pos.y = h - this.h / 2;
-      this.v.y = 0;
-      this.standing = true;
-      this.jumping = false;
+      return false;
     }
+    return true;
   }
 
   draw (ctx) {
