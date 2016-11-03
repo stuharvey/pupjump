@@ -1,6 +1,13 @@
-const GRAVITY = 25;
-const MOVE_SPEED = 400;
-const JUMP_SPEED = -850;
+import { PUP, GAME } from './constants'
+
+// We want jumps to last 1/2 a second each, so define the jump speed as some
+// value:
+// const BOUNCE_SPEED = -950;
+// then we want the y velocity to reach 0 after a second, so given our FPS,
+// calculate gravity as:
+
+// const GRAVITY = -BOUNCE_SPEED / FPS;
+// const MOVE_SPEED = 500;
 
 export default class Pup {
   constructor (args) {
@@ -43,9 +50,9 @@ export default class Pup {
     if (keys.right && keys.left)
       this.v.x = 0;
     else if (keys.right)
-      this.v.x = MOVE_SPEED;
+      this.v.x = PUP.MOVE_SPEED;
     else if (keys.left)
-      this.v.x = -MOVE_SPEED;
+      this.v.x = -PUP.MOVE_SPEED;
     else
       this.v.x = 0;
 
@@ -53,15 +60,13 @@ export default class Pup {
       if (!this.jumping) {
         this.standing = false;
         this.jumping = true;
-        this.v.y = JUMP_SPEED;
+        this.v.y = BOUNCE_SPEED;
       }
     }
   }
 
   updatePosition (delta) {
-    if (!this.standing) {
-      this.v.y += GRAVITY;
-    }
+    this.v.y += PUP.FALL_SPEED;
     this.pos.x += this.v.x * delta;
     this.pos.y += this.v.y * delta;
   }
@@ -78,8 +83,8 @@ export default class Pup {
     let above = this.pos.y <= platform.top;
     if (intersects && falling && above) {
       this.jumping = true;
-      let modifier = platform.type === 'boost' ? 1.75 : 1;
-      this.v.y = modifier * JUMP_SPEED;
+      let modifier = platform.type === 'boost' ? 2.5 : 1;
+      this.v.y = modifier * PUP.BOUNCE_SPEED;
       platform.falling = true;
       return true;
     }
