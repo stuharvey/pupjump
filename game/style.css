@@ -2,7 +2,7 @@ body {
   padding: 0;
   margin: 0;
   font-family: 'PT Mono', serif;
-  color: #ffffff;
+  color: #000;
 }
 canvas {
   display: block;
@@ -14,4 +14,17 @@ canvas {
   right: 0;
   width: 100%;
   height: 100%;
+}
+.current-score {
+  left: 20px;
+}
+.top-score {
+  right: 20px;
+}
+.score {
+  display: block;
+  position: absolute;
+  top: 15px;
+  z-index: 1;
+  font-size: 20px;
 }

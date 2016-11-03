@@ -77,6 +77,17 @@ export class PupJump extends Component {
     });
   }
 
+  updateScore (toAdd) {
+    this.setState({
+      score: this.state.score + toAdd
+    });
+    if (this.state.score > this.state.topScore) {
+      this.setState({
+        topScore: this.state.score
+      });
+    }
+  }
+
   componentDidMount () {
     this.addEventListeners();
     const ctx = this.refs.canvas.getContext('2d');
@@ -102,6 +113,10 @@ export class PupJump extends Component {
   }
 
   init () {
+    if (this.state.score > 0 && this.state.score > this.state.topScore) {
+      localStorage['topscore'] = this.state.score;
+    }
+
     this.worldShift = 0;
 
     let w = this.state.screen.width;
@@ -149,8 +164,12 @@ export class PupJump extends Component {
     if (delta < 0.2) { // don't update if delta too large, e.g. tabbing in
       this.scrollUp(delta);
       this.checkCollisions(delta);
-      if (!this.pup.update(state, delta)) {
+      let pupState = this.pup.update(state, delta);
+      if (!pupState.alive) {
         this.init();
+      }
+      if (pupState.scoreIncrease > 0) {
+        this.updateScore(pupState.scoreIncrease);
       }
       this.updatePlatforms(state, delta);
     }
@@ -223,9 +242,10 @@ export class PupJump extends Component {
     if (x0 < this.state.screen.width / 4) dx = Math.abs(dx);
     else if (x0 > (3/4) * this.state.screen.width) dx = -Math.abs(dx);
     let type = Math.random() > .05 ? 'normal' : 'boost';
+    let w = this.state.screen.width;
     let newPlat = new Platform({
       pos: {
-        x: x0 + dx,
+        x: rand.inRange(w / 6, (5/6) * w - PLAT.WIDTH),
         y: y0 - dy
       },
       type: type
@@ -240,6 +260,12 @@ export class PupJump extends Component {
   render () {
     return (
       <div>
+        <span className="score current-score">Score:
+          {parseInt(this.state.score / 100)}
+        </span>
+        <span className="score top-score">Top score:
+          {parseInt(this.state.topScore / 100)}
+        </span>
         <canvas ref="canvas"
           width={this.state.screen.width}
           height={this.state.screen.height}
