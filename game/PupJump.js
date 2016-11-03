@@ -2,15 +2,7 @@ import React, { Component } from 'react'
 import Platform from './Platform'
 import Pup from './Pup'
 import { RandNum } from './util'
-
-const SCROLL_SPEED = 50;
-const NUM_PLATFORMS = 12;
-
-const KEYS = {
-  LEFT: [37, 65],
-  RIGHT: [39, 68],
-  UP: [38, 87, 32]
-}
+import { GAME, PLAT } from './constants'
 
 export class PupJump extends Component {
   constructor () {
@@ -36,6 +28,8 @@ export class PupJump extends Component {
     this.platforms = [];
 
     this.handleResize = this.handleResize.bind(this);
+    this.handleTouchStart = this.handleTouchStart.bind(this);
+    this.handleTouchEnd = this.handleTouchEnd.bind(this);
 
     this.lastTime;
     this.currentTime;
@@ -54,13 +48,29 @@ export class PupJump extends Component {
     });
   }
 
+  handleTouchStart (e) {
+    let x = e.touches[0].pageX;
+    console.log(x);
+    if (x < this.state.screen.width / 2) {
+      this.state.keysPressed.left = true;
+    }
+    else {
+      this.state.keysPressed.right = true;
+    }
+  }
+
+  handleTouchEnd (e) {
+    this.state.keysPressed.left = false;
+    this.state.keysPressed.right = false;
+  }
+
   updateKeys (newState, e) {
     let keys = this.state.keysPressed;
     let code = e.keyCode;
 
-    if (KEYS.LEFT.includes(code))  keys.left = newState;
-    if (KEYS.RIGHT.includes(code)) keys.right = newState;
-    if (KEYS.UP.includes(code))    keys.up = newState;
+    if (GAME.KEYS.LEFT.includes(code))  keys.left = newState;
+    if (GAME.KEYS.RIGHT.includes(code)) keys.right = newState;
+    if (GAME.KEYS.UP.includes(code))    keys.up = newState;
 
     this.setState({
       keysPressed: keys
@@ -81,6 +91,8 @@ export class PupJump extends Component {
     window.addEventListener('keyup', this.updateKeys.bind(this, false));
     window.addEventListener('keydown', this.updateKeys.bind(this, true));
     window.addEventListener('resize', this.handleResize);
+    window.addEventListener('touchstart', this.handleTouchStart);
+    window.addEventListener('touchend', this.handleTouchEnd);
   }
 
   componentWillUnmount () {
@@ -102,12 +114,13 @@ export class PupJump extends Component {
       pos: {
         x: this.state.screen.width / 2,
         y: this.state.screen.height / 2
-      }
+      },
+      fps: GAME.FPS
     });
 
     this.platforms = [new Platform({
       pos: {
-        x: (w / 2) - (Platform.WIDTH / 2),
+        x: (w / 2) - (PLAT.WIDTH / 2),
         y: (3 * h / 4)
       }
     })];
@@ -115,8 +128,15 @@ export class PupJump extends Component {
 
     this.addPlatform();
 
-    // this.addPlatform(this.platforms[0]);
     this.lastTime = Date.now();
+
+    let that = this;
+    let eachInterval = function() {
+      that.update();
+    }
+    if (this.gameLoop === undefined) {
+      this.gameLoop = setInterval(eachInterval, 1000 / GAME.FPS);
+    }
   }
 
   update () {
@@ -136,7 +156,6 @@ export class PupJump extends Component {
     }
 
     this.lastTime = this.currentTime;
-    requestAnimationFrame(() => this.update());
   }
 
   updatePlatforms(state, delta) {
@@ -148,15 +167,13 @@ export class PupJump extends Component {
   }
 
   scrollUp(delta) {
-    if (this.pup.top < this.state.screen.height / 4) {
-      this.worldShift = this.shiftThreshold - this.pup.top;
-    }
+    this.worldShift = this.shiftThreshold - this.pup.top;
     if (this.worldShift > 0) {
       let modifier = (
         (this.shiftThreshold + this.worldShift) / this.shiftThreshold
       );
       if (modifier < 1) modifier = 1;
-      let shiftAmt = SCROLL_SPEED * Math.pow(modifier, 5) * delta;
+      let shiftAmt = GAME.SCROLL_SPEED * Math.pow(modifier, 5) * delta;
       let plats = this.platforms;
       for (let i = 0; i < plats.length; i++) {
         plats[i].top = plats[i].top + shiftAmt;
@@ -193,19 +210,19 @@ export class PupJump extends Component {
   }
 
   addPlatform () {
-    if (this.platforms.length >= NUM_PLATFORMS) return;
+    if (this.platforms.length >= GAME.NUM_PLATFORMS) return;
 
     let rand = this.rand;
     let base = this.maxPlatform;
     let x0 = base.left;
     let y0 = base.top;
 
-    let dx = rand.sign() * rand.inRange(Platform.MIN_X_SEP, Platform.MAX_X_SEP);
-    let dy = rand.inRange(Platform.MIN_Y_SEP, Platform.MAX_Y_SEP);
+    let dx = rand.sign() * rand.inRange(PLAT.MIN_X_SEP, PLAT.MAX_X_SEP);
+    let dy = rand.inRange(PLAT.MIN_Y_SEP, PLAT.MAX_Y_SEP);
 
     if (x0 < this.state.screen.width / 4) dx = Math.abs(dx);
     else if (x0 > (3/4) * this.state.screen.width) dx = -Math.abs(dx);
-    let type = Math.random() > .25 ? 'normal' : 'boost';
+    let type = Math.random() > .05 ? 'normal' : 'boost';
     let newPlat = new Platform({
       pos: {
         x: x0 + dx,
