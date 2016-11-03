@@ -67,3 +67,21 @@ export class RandNum {
     return Math.random() > .5 ? 0 : 1;
   }
 }
+
+export class Interp {
+  // Smoothly interpolates from min to max given the current time
+  static smoothValue(min, max, t) {
+    return Interp.smoothstep(0, 1, t) * (max - min) + min;
+  }
+
+  static smoothstep(min, max, x) {
+    x = Interp.clamp((x - min)/(max - min), 0.0, 1.0);
+    return x*x*x*(x*(x*6 - 15) + 10);
+  }
+
+
+  // Clamp x to the interval [a, b]
+  static clamp(x, a, b) {
+    return x < a ? a : (x > b ? b : x);
+  }
+}

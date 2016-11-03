@@ -1,5 +1,6 @@
-// I shouldn't have to do things like this. If there's a better way, please
-// create an issue in this repo
+// This file contains various constants for which a number of components may be
+// concerned. If there's a better way to do class-based constants (similar to
+// enums maybe?) please ping me or leave an issue on github
 export class PUP {
   static get BOUNCE_SPEED () {
     return -1200;
@@ -10,13 +11,17 @@ export class PUP {
     return -this.BOUNCE_SPEED / (0.75 * GAME.FPS);
   }
 
-  static get MOVE_SPEED () {
-    return this._moveSpeed || 600;
+  static get MIN_V_X () {
+    return 450;
   }
 
-  // Want to be able to cross the whole screen in one second
-  static set MOVE_SPEED (gameWidth) {
-    this._moveSpeed = gameWidth / GAME.FPS;
+  static get MAX_V_X () {
+    return 800;
+  }
+
+  // Time to accelerate from min horizontal speed to max
+  static get INTERP_TIME () {
+    return 0.1;
   }
 }
 
@@ -26,11 +31,11 @@ export class GAME {
   }
 
   static get NUM_PLATFORMS () {
-    return 50;
+    return 30;
   }
 
   static get SCROLL_SPEED () {
-    return 50;
+    return 75;
   }
 
   static get KEYS () {

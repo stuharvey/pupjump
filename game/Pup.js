@@ -1,13 +1,5 @@
 import { PUP, GAME } from './constants'
-
-// We want jumps to last 1/2 a second each, so define the jump speed as some
-// value:
-// const BOUNCE_SPEED = -950;
-// then we want the y velocity to reach 0 after a second, so given our FPS,
-// calculate gravity as:
-
-// const GRAVITY = -BOUNCE_SPEED / FPS;
-// const MOVE_SPEED = 500;
+import { Interp } from './util'
 
 export default class Pup {
   constructor (args) {
@@ -16,6 +8,8 @@ export default class Pup {
       x: 0,
       y: 0
     }
+    this.xDir = 0; // -1 <=> left, 1 <=> right
+    this.moveStart = 0; // time we started moving
     this.w = 20;
     this.h = 20;
     this.jumping = false;
@@ -50,21 +44,23 @@ export default class Pup {
   }
 
   updateVelocities (keys) {
-    if (keys.right && keys.left)
-      this.v.x = 0;
-    else if (keys.right)
-      this.v.x = PUP.MOVE_SPEED;
+    if ((keys.right && keys.left) || !(keys.left || keys.right)) {
+      this.xDir = 0;
+      this.moveStart = 0;
+    }
+    else if (keys.right) {
+      this.xDir = 1;
+    }
     else if (keys.left)
-      this.v.x = -PUP.MOVE_SPEED;
-    else
-      this.v.x = 0;
+      this.xDir = -1;
 
-    if (keys.up) {
-      if (!this.jumping) {
-        this.standing = false;
-        this.jumping = true;
-        this.v.y = BOUNCE_SPEED;
-      }
+    if (this.xDir !== 0) {
+      if (this.moveStart === 0) this.moveStart = Date.now();
+      let t = (Date.now() - this.moveStart) / (1000 * PUP.INTERP_TIME);
+      this.v.x = this.xDir * Interp.smoothValue(PUP.MIN_V_X, PUP.MAX_V_X, t);
+    }
+    else {
+      this.v.x = 0;
     }
   }
 
