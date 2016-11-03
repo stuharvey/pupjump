@@ -27,11 +27,13 @@ module.exports = {
   module: {
     loaders: [{
       test: /\.css$/,
-      loader: "style-loader!css-loader"
+      loader: 'style-loader!css-loader'
     },{
       test: /\.js$/,
       loaders: ['babel'],
       include: path.join(__dirname, 'game')
+    },{
+      test: /\.(png|jpg)$/, loader: 'url-loader?limit=8192'
     }]
   }
 };
