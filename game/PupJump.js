@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import Platform from './Platform'
 import Pup from './Pup'
 import { RandNum } from './util'
-import { GAME, PLAT } from './constants'
+import { GAME, PLAT, PUP } from './constants'
 
 export class PupJump extends Component {
   constructor () {
@@ -20,11 +20,21 @@ export class PupJump extends Component {
       },
       ctx: null,
       score: 0,
-      topScore: localStorage.topscore || 0
+      topScore: localStorage.topscore || 0,
+      pupImage: null
     }
 
     this.pup = null;
-    this.pupImage = new Image();
+    this.loadImages();
+    // this.pupImage = new Image();
+    // this.pupImageLoaded = false;
+    // let that = this;
+    // this.pupImage.onload = function() {
+    //   that.pupImageLoaded = true;
+    //   if (that.pup !== null)
+    //     that.pup.image = that.pupImage;
+    // };
+    // this.pupImage.src = require('./images/pup.png');
 
     this.platforms = [];
 
@@ -35,9 +45,54 @@ export class PupJump extends Component {
     this.lastTime;
     this.currentTime;
 
-    this.shiftThreshold = (3 / 4) * this.state.screen.height;
+    this.shiftThreshold = (1 / 2) * this.state.screen.height;
     this.maxPlatform = null;
     this.rand = new RandNum();
+  }
+
+  loadImages () {
+    this.imagesLoaded = 0;
+    this.images = {
+      pupUpL: new Image(),
+      pupUpR: new Image()
+    }
+    let that = this;
+    this.images.pupUpL.onload = function() {
+      that.imagesLoaded += 1;
+      if (that.pup !== null)
+        that.pup.images.pupUpL = that.images.pupUpL;
+    }
+    this.images.pupUpR.onload = function() {
+      that.imagesLoaded += 1;
+      if (that.pup !== null)
+        that.pup.images.pupUpR = that.images.pupUpR;
+    }
+    this.images.pupUpL.src = require('./images/pupL_rise.png');
+    this.images.pupUpR.src = require('./images/pupR_rise.png');
+  }
+
+  componentDidMount () {
+    this.addEventListeners();
+    const ctx = this.refs.canvas.getContext('2d');
+    this.setState({ ctx : ctx });
+    this.init();
+
+    // start the game loop
+    requestAnimationFrame(() => this.update());
+  }
+
+  componentWillUnmount () {
+    window.removeEventListener('resize', this.updateKeys);
+    window.removeEventListener('resize', this.updateKeys);
+    window.removeEventListener('resize', this.handleResize);
+  }
+
+  addEventListeners () {
+    window.addEventListener('keyup', this.updateKeys.bind(this, false));
+    window.addEventListener('keydown', this.updateKeys.bind(this, true));
+    window.addEventListener('resize', this.handleResize);
+    window.addEventListener('touchstart', this.handleTouchStart);
+    window.addEventListener('touchend', this.handleTouchEnd);
   }
 
   handleResize () {
@@ -77,41 +132,6 @@ export class PupJump extends Component {
     });
   }
 
-  updateScore (toAdd) {
-    this.setState({
-      score: this.state.score + toAdd
-    });
-    if (this.state.score > this.state.topScore) {
-      this.setState({
-        topScore: this.state.score
-      });
-    }
-  }
-
-  componentDidMount () {
-    this.addEventListeners();
-    const ctx = this.refs.canvas.getContext('2d');
-    this.setState({ ctx : ctx });
-    this.init();
-
-    // start the game loop
-    requestAnimationFrame(() => this.update());
-  }
-
-  addEventListeners () {
-    window.addEventListener('keyup', this.updateKeys.bind(this, false));
-    window.addEventListener('keydown', this.updateKeys.bind(this, true));
-    window.addEventListener('resize', this.handleResize);
-    window.addEventListener('touchstart', this.handleTouchStart);
-    window.addEventListener('touchend', this.handleTouchEnd);
-  }
-
-  componentWillUnmount () {
-    window.removeEventListener('resize', this.updateKeys);
-    window.removeEventListener('resize', this.updateKeys);
-    window.removeEventListener('resize', this.handleResize);
-  }
-
   init () {
     if (this.state.score > 0 && this.state.score > localStorage.topscore) {
       localStorage.topscore = this.state.score;
@@ -130,7 +150,8 @@ export class PupJump extends Component {
         x: this.state.screen.width / 2,
         y: this.state.screen.height / 2
       },
-      fps: GAME.FPS
+      fps: GAME.FPS,
+      images: this.imagesLoaded === PUP.NUM_SPRITES ? this.images : {}
     });
 
     this.platforms = [new Platform({
@@ -175,6 +196,17 @@ export class PupJump extends Component {
     }
 
     this.lastTime = this.currentTime;
+  }
+
+  updateScore (toAdd) {
+    this.setState({
+      score: this.state.score + toAdd
+    });
+    if (this.state.score > this.state.topScore) {
+      this.setState({
+        topScore: this.state.score
+      });
+    }
   }
 
   updatePlatforms(state, delta) {

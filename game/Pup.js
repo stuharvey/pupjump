@@ -9,11 +9,13 @@ export default class Pup {
       y: 0
     }
     this.xDir = 0; // -1 <=> left, 1 <=> right
+    this.lastDir = 0;
     this.moveStart = 0; // time we started moving
     this.w = 20;
     this.h = 20;
     this.jumping = false;
     this.standing = false;
+    this.images = args.images;
   }
 
   get left () {
@@ -33,6 +35,8 @@ export default class Pup {
   }
 
   update (state, delta) {
+    if (this.image == null && state.pupImage != null)
+      this.image = state.pupImage;
     let alive = this.checkBoundaries(state.screen.width, state.screen.height);
     this.updateVelocities(state.keysPressed);
     let scoreIncrease = this.updatePosition(delta);
@@ -49,10 +53,10 @@ export default class Pup {
       this.moveStart = 0;
     }
     else if (keys.right) {
-      this.xDir = 1;
+      this.xDir = this.lastDir = 1;
     }
     else if (keys.left)
-      this.xDir = -1;
+      this.xDir = this.lastDir = -1;
 
     if (this.xDir !== 0) {
       if (this.moveStart === 0) this.moveStart = Date.now();
@@ -116,10 +120,22 @@ export default class Pup {
 
     ctx.fillStyle = '#000';
 
-    if (this.image === undefined)
+    if (Object.keys(this.images).length === 0) // check if images is null
       ctx.fillRect(this.left, this.top, this.w, this.h);
-    else
-      ctx.drawImage(this.image, this.left, this.top);
+    else {
+      let img;
+      // if the pup is zooming, point him in the direction he's going
+      if (this.v.y < 0 && this.v.x !== 0) {
+        ctx.translate(this.left + this.w/2, this.top + this.h/2);
+        // multiply vx by 4 for dampening
+        let angle = Math.atan(-this.v.y / (4 * this.v.x));
+        ctx.rotate(angle);
+        ctx.translate(-(this.left + this.w/2), -(this.top + this.h/2));
+      }
+      if (this.lastDir === 1) img = this.images.pupUpR;
+      else                    img = this.images.pupUpL;
+      ctx.drawImage(img, this.left, this.top);
+    }
 
     ctx.restore();
   }

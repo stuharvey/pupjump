@@ -12,16 +12,20 @@ export class PUP {
   }
 
   static get MIN_V_X () {
-    return 450;
+    return 350;
   }
 
   static get MAX_V_X () {
-    return 800;
+    return 950;
   }
 
   // Time to accelerate from min horizontal speed to max
   static get INTERP_TIME () {
-    return 0.1;
+    return 0.15;
+  }
+
+  static get NUM_SPRITES () {
+    return 2;
   }
 }
 
