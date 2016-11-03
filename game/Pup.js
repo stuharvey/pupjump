@@ -41,9 +41,12 @@ export default class Pup {
   update (state, delta) {
     let alive = this.checkBoundaries(state.screen.width, state.screen.height);
     this.updateVelocities(state.keysPressed);
-    this.updatePosition(delta);
+    let scoreIncrease = this.updatePosition(delta);
     this.draw(state.ctx);
-    return alive;
+    return {
+      alive: alive,
+      scoreIncrease: scoreIncrease
+    };
   }
 
   updateVelocities (keys) {
@@ -69,6 +72,10 @@ export default class Pup {
     this.v.y += PUP.FALL_SPEED;
     this.pos.x += this.v.x * delta;
     this.pos.y += this.v.y * delta;
+    if (this.v.y < 0) {
+      return Math.abs(this.v.y * delta);
+    }
+    return 0;
   }
 
   checkCollision (delta, platform) {
