@@ -7,6 +7,7 @@ import { GAME, PLAT } from './constants'
 export class PupJump extends Component {
   constructor () {
     super();
+
     this.state = {
       screen: {
         width: window.innerWidth,
@@ -50,7 +51,6 @@ export class PupJump extends Component {
 
   handleTouchStart (e) {
     let x = e.touches[0].pageX;
-    console.log(x);
     if (x < this.state.screen.width / 2) {
       this.state.keysPressed.left = true;
     }
@@ -113,8 +113,8 @@ export class PupJump extends Component {
   }
 
   init () {
-    if (this.state.score > 0 && this.state.score > this.state.topScore) {
-      localStorage['topscore'] = this.state.score;
+    if (this.state.score > 0 && this.state.score > localStorage.topscore) {
+      localStorage.topscore = this.state.score;
     }
 
     this.worldShift = 0;
@@ -263,7 +263,7 @@ export class PupJump extends Component {
         <span className="score current-score">Score:
           {parseInt(this.state.score / 100)}
         </span>
-        <span className="score top-score">Top score:
+        <span className="score top-score">High score:
           {parseInt(this.state.topScore / 100)}
         </span>
         <canvas ref="canvas"
