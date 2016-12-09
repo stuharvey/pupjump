@@ -3,12 +3,12 @@
 // enums maybe?) please ping me or leave an issue on github
 export class PUP {
   static get BOUNCE_SPEED () {
-    return -1200;
+    return -1600;
   }
 
   // Want to be rising for 3/4 a second
   static get FALL_SPEED () {
-    return -this.BOUNCE_SPEED / (0.75 * GAME.FPS);
+    return -this.BOUNCE_SPEED / (0.8 * GAME.FPS);
   }
 
   static get MIN_V_X () {
@@ -16,16 +16,12 @@ export class PUP {
   }
 
   static get MAX_V_X () {
-    return 950;
+    return 1000;
   }
 
   // Time to accelerate from min horizontal speed to max
   static get INTERP_TIME () {
-    return 0.15;
-  }
-
-  static get NUM_SPRITES () {
-    return 2;
+    return 0.3;
   }
 }
 
@@ -48,6 +44,10 @@ export class GAME {
       RIGHT: [39, 68],
       UP: [38, 87, 32]
     }
+  }
+
+  static get NUM_IMAGES () {
+    return 2;
   }
 }
 

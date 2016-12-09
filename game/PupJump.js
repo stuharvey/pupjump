@@ -26,15 +26,6 @@ export class PupJump extends Component {
 
     this.pup = null;
     this.loadImages();
-    // this.pupImage = new Image();
-    // this.pupImageLoaded = false;
-    // let that = this;
-    // this.pupImage.onload = function() {
-    //   that.pupImageLoaded = true;
-    //   if (that.pup !== null)
-    //     that.pup.image = that.pupImage;
-    // };
-    // this.pupImage.src = require('./images/pup.png');
 
     this.platforms = [];
 
@@ -54,7 +45,7 @@ export class PupJump extends Component {
     this.imagesLoaded = 0;
     this.images = {
       pupUpL: new Image(),
-      pupUpR: new Image()
+      pupUpR: new Image(),
     }
     let that = this;
     this.images.pupUpL.onload = function() {
@@ -76,9 +67,6 @@ export class PupJump extends Component {
     const ctx = this.refs.canvas.getContext('2d');
     this.setState({ ctx : ctx });
     this.init();
-
-    // start the game loop
-    requestAnimationFrame(() => this.update());
   }
 
   componentWillUnmount () {
@@ -151,14 +139,16 @@ export class PupJump extends Component {
         y: this.state.screen.height / 2
       },
       fps: GAME.FPS,
-      images: this.imagesLoaded === PUP.NUM_SPRITES ? this.images : {}
+      images: this.imagesLoaded === GAME.NUM_IMAGES ? this.images : {}
     });
 
     this.platforms = [new Platform({
       pos: {
         x: (w / 2) - (PLAT.WIDTH / 2),
         y: (3 * h / 4)
-      }
+      },
+      type: 'normal',
+      images: this.imagesLoaded === GAME.NUM_IMAGES ? this.images : {}
     })];
     this.maxPlatform = this.platforms[0];
 
@@ -185,6 +175,7 @@ export class PupJump extends Component {
     if (delta < 0.2) { // don't update if delta too large, e.g. tabbing in
       this.scrollUp(delta);
       this.checkCollisions(delta);
+      this.updatePlatforms(state, delta);
       let pupState = this.pup.update(state, delta);
       if (!pupState.alive) {
         this.init();
@@ -192,7 +183,6 @@ export class PupJump extends Component {
       if (pupState.scoreIncrease > 0) {
         this.updateScore(pupState.scoreIncrease);
       }
-      this.updatePlatforms(state, delta);
     }
 
     this.lastTime = this.currentTime;
@@ -280,7 +270,8 @@ export class PupJump extends Component {
         x: rand.inRange(w / 6, (5/6) * w - PLAT.WIDTH),
         y: y0 - dy
       },
-      type: type
+      type: type,
+      images: this.imagesLoaded === GAME.NUM_IMAGES ? this.images : {}
     });
 
     if (newPlat.top < this.maxPlatform.top)
