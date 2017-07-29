@@ -39,7 +39,7 @@ export default class Pup {
       this.image = state.pupImage;
     let alive = this.checkBoundaries(state.screen.width, state.screen.height);
     this.updateVelocities(state.keysPressed);
-    let scoreIncrease = this.updatePosition(delta);
+    let scoreIncrease = this.updatePosition(delta, state.paused);
     this.draw(state.ctx);
     return {
       alive: alive,
@@ -68,8 +68,10 @@ export default class Pup {
     }
   }
 
-  updatePosition (delta) {
-    this.v.y += PUP.FALL_SPEED;
+  updatePosition (delta, paused) {
+    if (!paused) {
+      this.v.y += PUP.FALL_SPEED;
+    }
     this.pos.x += this.v.x * delta;
     this.pos.y += this.v.y * delta;
     if (this.v.y < 0) {

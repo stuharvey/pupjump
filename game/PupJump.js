@@ -3,26 +3,28 @@ import Platform from './Platform'
 import Pup from './Pup'
 import { RandNum } from './util'
 import { GAME, PLAT, PUP } from './constants'
+import Link from './components/Link';
 
 export class PupJump extends Component {
+  state = {
+    paused: false,
+    screen: {
+      width: window.innerWidth,
+      height: window.innerHeight
+    },
+    keysPressed: {
+      left  : 0,
+      right : 0,
+      up    : 0
+    },
+    ctx: null,
+    score: 0,
+    topScore: localStorage.topscore || 0,
+    pupImage: null
+  }
+
   constructor () {
     super();
-
-    this.state = {
-      screen: {
-        width: window.innerWidth,
-        height: window.innerHeight
-      },
-      keysPressed: {
-        left  : 0,
-        right : 0,
-        up    : 0
-      },
-      ctx: null,
-      score: 0,
-      topScore: localStorage.topscore || 0,
-      pupImage: null
-    }
 
     this.pup = null;
     this.loadImages();
@@ -156,21 +158,19 @@ export class PupJump extends Component {
 
     this.lastTime = Date.now();
 
-    let that = this;
-    let eachInterval = function() {
-      that.update();
-    }
     if (this.gameLoop === undefined) {
-      this.gameLoop = setInterval(eachInterval, 1000 / GAME.FPS);
+      this.gameLoop = setInterval(() => this.update(), 1000 / GAME.FPS);
     }
   }
 
   update () {
     this.redrawBackground();
-    let state = this.state;
+    const state = this.state;
+    const { paused } = state;
 
     this.currentTime = Date.now();
-    let delta = (this.currentTime - this.lastTime) / 1000;
+    const timeDiffMs = (this.currentTime - this.lastTime);
+    let delta = this.state.paused ? 0.000000001 : timeDiffMs / 1000;
 
     if (delta < 0.2) { // don't update if delta too large, e.g. tabbing in
       this.scrollUp(delta);
@@ -229,7 +229,7 @@ export class PupJump extends Component {
     let ctx = state.ctx;
 
     ctx.save();
-    ctx.fillStyle = '#FFF';
+    ctx.fillStyle = 'beige';
     ctx.fillRect(0, 0, state.screen.width, state.screen.height);
     ctx.restore();
   }
@@ -248,6 +248,13 @@ export class PupJump extends Component {
         this.worldShift = this.shiftThreshold - plat.top;
       }
     }
+  }
+
+  togglePause() {
+    this.setState(lastState => {
+      this.lastTime = Date.now()
+      return { paused: !lastState.paused }
+    });
   }
 
   addPlatform () {
@@ -283,12 +290,24 @@ export class PupJump extends Component {
   render () {
     return (
       <div>
-        <span className="score current-score">Score:
+        <span className="current-score score">Score:
           {parseInt(this.state.score / 100)}
         </span>
         <span className="score top-score">High score:
           {parseInt(this.state.topScore / 100)}
         </span>
+        <ul className="links">
+          <Link
+            address="#"
+            text="About"
+            onClick={() => this.togglePause()}
+          />
+          <Link
+            address="#"
+            text="Books"
+            onClick={() => this.togglePause()}
+          />
+        </ul>
         <canvas ref="canvas"
           width={this.state.screen.width}
           height={this.state.screen.height}
