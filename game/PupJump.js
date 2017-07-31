@@ -1,9 +1,15 @@
 import React, { Component } from 'react'
+
+// Game related imports
 import Platform from './Platform'
 import Pup from './Pup'
 import { RandNum } from './util'
 import { GAME, PLAT, PUP } from './constants'
+
+// Component imports
 import Link from './components/Link';
+import BooksModal from './components/BooksModal';
+
 
 export class PupJump extends Component {
   state = {
@@ -20,7 +26,8 @@ export class PupJump extends Component {
     ctx: null,
     score: 0,
     topScore: localStorage.topscore || 0,
-    pupImage: null
+    pupImage: null,
+    activeModal: null,
   }
 
   constructor () {
@@ -288,8 +295,13 @@ export class PupJump extends Component {
   }
 
   render () {
+    const { activeModal } = this.state;
     return (
       <div>
+        <BooksModal
+          active={activeModal === 'books'}
+        />
+
         <span className="current-score score">Score:
           {parseInt(this.state.score / 100)}
         </span>
@@ -305,7 +317,11 @@ export class PupJump extends Component {
           <Link
             address="#"
             text="Books"
-            onClick={() => this.togglePause()}
+            onClick={() => {
+              const isActive = activeModal === 'books';
+              this.setState({ activeModal: isActive ? null : 'books' });
+              this.togglePause();
+            }}
           />
         </ul>
         <canvas ref="canvas"
