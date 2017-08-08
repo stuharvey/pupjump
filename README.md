@@ -17,3 +17,11 @@ npm start
 ```
 npm run build
 ```
+
+## Deploying to GitHub pages
+
+After pushing to `master`:
+* Checkout `gh-pages`
+* Merge changes from `master`
+* Run the build script
+* Commit the new build and push
