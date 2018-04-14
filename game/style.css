@@ -1,10 +1,18 @@
+html {
+  box-sizing: border-box;
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
 body {
   padding: 0;
   margin: 0;
   font-family: 'PT Mono', serif;
   color: #000;
-  background-color: 'purple';
+  background-color: purple;
 }
+
 canvas {
   display: block;
   background-color: #fff;
@@ -16,6 +24,7 @@ canvas {
   width: 100%;
   height: 100%;
 }
+
 .score {
   display: block;
   position: absolute;
@@ -23,13 +32,16 @@ canvas {
   z-index: 1;
   font-size: 20px;
 }
+
 .current-score {
   right: 20px;
   top: 35px;
 }
+
 .top-score {
   right: 20px;
 }
+
 .links {
   position: absolute;
   top: 15px;
@@ -41,6 +53,7 @@ canvas {
   -webkit-margin-after: 0;
   -webkit-padding-start: 0;
 }
+
 .link {
   padding-bottom: 5px;
 }
