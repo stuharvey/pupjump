@@ -30,9 +30,10 @@ const Book = ({
     </div>
   )
 
-const BooksModal = ({ active }) => (
+const BooksModal = ({ active, handleClose }) => (
   <Modal
     isOpen={active}
+    onRequestClose={handleClose}
     style={{
       content: {
         padding: 20,
@@ -41,13 +42,16 @@ const BooksModal = ({ active }) => (
     }}
     contentLabel="booksModal"
   >
-    <h2>
+    <h1 style={{margin: 0}}>
       Books I've read
-    </h2>
+      <span style={{ float: 'right' }}>
+        <a style={{ height: 24, width: 24, cursor: 'pointer' }} onClick={handleClose}>X</a>
+      </span>
+    </h1>
     {Object.entries(BOOKS
       .reduce((booksInYear, book) => (
         { ...booksInYear, [book.yearRead]: [...booksInYear[book.yearRead], book] }
-      ), {2018: [], 2017: []}))
+      ), { 2018: [], 2017: [] }))
       .map(([year, books]) =>
         <div>
           <h2>

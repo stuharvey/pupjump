@@ -53,11 +53,11 @@ export class GAME {
 
 export class PLAT {
   static get WIDTH() {
-    return 30;
+    return 35;
   }
 
   static get HEIGHT() {
-    return 10;
+    return 7;
   }
 
   static get MAX_X_SEP () {
@@ -73,10 +73,22 @@ export class PLAT {
   }
 
   static get MIN_Y_SEP () {
-    return 20;
+    return 35;
   }
 
   static get FALL_SPEED () {
     return 200;
+  }
+
+  static get MOVE_SPEED() {
+    return 150;
+  }
+
+  static get BASE_TRAVEL_DISTANCE() {
+    return 800;
+  }
+
+  static get MOVING() {
+    return 'MOVING';
   }
 }
