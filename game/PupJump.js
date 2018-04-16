@@ -10,6 +10,7 @@ import { GAME, PLAT, PUP } from './constants'
 import Link from './components/Link';
 import BooksModal from './components/BooksModal';
 
+const getTopScore = () => parseFloat(localStorage.getItem('topScore') || '0');
 
 export class PupJump extends Component {
   state = {
@@ -25,7 +26,7 @@ export class PupJump extends Component {
     },
     ctx: null,
     score: 0,
-    topScore: localStorage.topscore || 0,
+    topScore: getTopScore(),
     pupImage: null,
     activeModal: null,
   }
@@ -131,8 +132,9 @@ export class PupJump extends Component {
   }
 
   init() {
-    if (this.state.score > 0 && this.state.score > localStorage.topscore) {
-      localStorage.topscore = this.state.score;
+    console.log(this.state.topScore, this.state.score)
+    if (this.state.score > 0 && this.state.score > getTopScore()) {
+      localStorage.setItem('topScore', `${this.state.score}`);
     }
 
     this.worldShift = 0;
