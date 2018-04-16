@@ -132,7 +132,6 @@ export class PupJump extends Component {
   }
 
   init() {
-    console.log(this.state.topScore, this.state.score)
     if (this.state.score > 0 && this.state.score > getTopScore()) {
       localStorage.setItem('topScore', `${this.state.score}`);
     }
