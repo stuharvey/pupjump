@@ -1,9 +1,15 @@
 import React, { Component } from 'react'
+
+// Game related imports
 import Platform from './Platform'
 import Pup from './Pup'
 import { RandNum } from './util'
 import { GAME, PLAT, PUP } from './constants'
+
+// Component imports
 import Link from './components/Link';
+import BooksModal from './components/BooksModal';
+
 
 export class PupJump extends Component {
   state = {
@@ -13,17 +19,18 @@ export class PupJump extends Component {
       height: window.innerHeight
     },
     keysPressed: {
-      left  : 0,
-      right : 0,
-      up    : 0
+      left: 0,
+      right: 0,
+      up: 0
     },
     ctx: null,
     score: 0,
     topScore: localStorage.topscore || 0,
-    pupImage: null
+    pupImage: null,
+    activeModal: null,
   }
 
-  constructor () {
+  constructor() {
     super();
 
     this.pup = null;
@@ -43,19 +50,19 @@ export class PupJump extends Component {
     this.rand = new RandNum();
   }
 
-  loadImages () {
+  loadImages() {
     this.imagesLoaded = 0;
     this.images = {
       pupUpL: new Image(),
       pupUpR: new Image(),
     }
     let that = this;
-    this.images.pupUpL.onload = function() {
+    this.images.pupUpL.onload = function () {
       that.imagesLoaded += 1;
       if (that.pup !== null)
         that.pup.images.pupUpL = that.images.pupUpL;
     }
-    this.images.pupUpR.onload = function() {
+    this.images.pupUpR.onload = function () {
       that.imagesLoaded += 1;
       if (that.pup !== null)
         that.pup.images.pupUpR = that.images.pupUpR;
@@ -64,20 +71,20 @@ export class PupJump extends Component {
     this.images.pupUpR.src = require('./images/pupR_rise.png');
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.addEventListeners();
     const ctx = this.refs.canvas.getContext('2d');
-    this.setState({ ctx : ctx });
+    this.setState({ ctx: ctx });
     this.init();
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     window.removeEventListener('resize', this.updateKeys);
     window.removeEventListener('resize', this.updateKeys);
     window.removeEventListener('resize', this.handleResize);
   }
 
-  addEventListeners () {
+  addEventListeners() {
     window.addEventListener('keyup', this.updateKeys.bind(this, false));
     window.addEventListener('keydown', this.updateKeys.bind(this, true));
     window.addEventListener('resize', this.handleResize);
@@ -85,7 +92,7 @@ export class PupJump extends Component {
     window.addEventListener('touchend', this.handleTouchEnd);
   }
 
-  handleResize () {
+  handleResize() {
     this.setState({
       screen: {
         width: window.innerWidth,
@@ -94,7 +101,7 @@ export class PupJump extends Component {
     });
   }
 
-  handleTouchStart (e) {
+  handleTouchStart(e) {
     let x = e.touches[0].pageX;
     if (x < this.state.screen.width / 2) {
       this.state.keysPressed.left = true;
@@ -104,25 +111,26 @@ export class PupJump extends Component {
     }
   }
 
-  handleTouchEnd (e) {
+  handleTouchEnd(e) {
     this.state.keysPressed.left = false;
     this.state.keysPressed.right = false;
   }
 
-  updateKeys (newState, e) {
+  updateKeys(newState, e) {
     let keys = this.state.keysPressed;
     let code = e.keyCode;
 
-    if (GAME.KEYS.LEFT.includes(code))  keys.left = newState;
+    if (GAME.KEYS.LEFT.includes(code)) keys.left = newState;
     if (GAME.KEYS.RIGHT.includes(code)) keys.right = newState;
-    if (GAME.KEYS.UP.includes(code))    keys.up = newState;
+    if (GAME.KEYS.UP.includes(code)) keys.up = newState;
+    if (e.type === 'keyup' && (e.key === ' ' || e.key === 'Escape')) this.togglePause()
 
     this.setState({
-      keysPressed: keys
+      keysPressed: keys,
     });
   }
 
-  init () {
+  init() {
     if (this.state.score > 0 && this.state.score > localStorage.topscore) {
       localStorage.topscore = this.state.score;
     }
@@ -163,14 +171,14 @@ export class PupJump extends Component {
     }
   }
 
-  update () {
+  update() {
     this.redrawBackground();
     const state = this.state;
     const { paused } = state;
 
     this.currentTime = Date.now();
     const timeDiffMs = (this.currentTime - this.lastTime);
-    let delta = this.state.paused ? 0.000000001 : timeDiffMs / 1000;
+    let delta = paused ? 0.000000001 : timeDiffMs / 1000;
 
     if (delta < 0.2) { // don't update if delta too large, e.g. tabbing in
       this.scrollUp(delta);
@@ -188,7 +196,7 @@ export class PupJump extends Component {
     this.lastTime = this.currentTime;
   }
 
-  updateScore (toAdd) {
+  updateScore(toAdd) {
     this.setState({
       score: this.state.score + toAdd
     });
@@ -200,7 +208,7 @@ export class PupJump extends Component {
   }
 
   updatePlatforms(state, delta) {
-    this.platforms = this.platforms.reduce(function(plats, p) {
+    this.platforms = this.platforms.reduce(function (plats, p) {
       if (p.update(state, delta)) plats.push(p);
       return plats;
     }, []);
@@ -224,7 +232,7 @@ export class PupJump extends Component {
     }
   }
 
-  redrawBackground () {
+  redrawBackground() {
     let state = this.state;
     let ctx = state.ctx;
 
@@ -257,7 +265,7 @@ export class PupJump extends Component {
     });
   }
 
-  addPlatform () {
+  addPlatform() {
     if (this.platforms.length >= GAME.NUM_PLATFORMS) return;
 
     let rand = this.rand;
@@ -269,16 +277,18 @@ export class PupJump extends Component {
     let dy = rand.inRange(PLAT.MIN_Y_SEP, PLAT.MAX_Y_SEP);
 
     if (x0 < this.state.screen.width / 4) dx = Math.abs(dx);
-    else if (x0 > (3/4) * this.state.screen.width) dx = -Math.abs(dx);
-    let type = Math.random() > .05 ? 'normal' : 'boost';
+    else if (x0 > (3 / 4) * this.state.screen.width) dx = -Math.abs(dx);
+
+    const r = Math.random()
+    const type = r > 0.15 ? 'normal' : r > .05 ? 'MOVING' : 'boost';
     let w = this.state.screen.width;
     let newPlat = new Platform({
       pos: {
-        x: rand.inRange(w / 6, (5/6) * w - PLAT.WIDTH),
+        x: rand.inRange(w / 6, (5 / 6) * w - PLAT.WIDTH),
         y: y0 - dy
       },
       type: type,
-      images: this.imagesLoaded === GAME.NUM_IMAGES ? this.images : {}
+      images: this.imagesLoaded === GAME.NUM_IMAGES ? this.images : {},
     });
 
     if (newPlat.top < this.maxPlatform.top)
@@ -287,9 +297,19 @@ export class PupJump extends Component {
     this.platforms.push(newPlat);
   }
 
-  render () {
+  toggleModal = modalName => e => {
+    this.setState(prev => ({ activeModal: prev.activeModal === modalName ? null : modalName }))
+    this.togglePause()
+  }
+
+  render() {
+    const { activeModal } = this.state;
     return (
       <div>
+        <BooksModal
+          active={activeModal === 'books'}
+          handleClose={this.toggleModal('books')}
+        />
         <span className="current-score score">Score:
           {parseInt(this.state.score / 100)}
         </span>
@@ -300,12 +320,12 @@ export class PupJump extends Component {
           <Link
             address="#"
             text="About"
-            onClick={() => this.togglePause()}
+            onClick={this.toggleModal('aobut')}
           />
           <Link
             address="#"
             text="Books"
-            onClick={() => this.togglePause()}
+            onClick={this.toggleModal('books')}
           />
         </ul>
         <canvas ref="canvas"

@@ -93,6 +93,7 @@ export default class Pup {
     if (intersects && falling && above) {
       this.jumping = true;
       let modifier = platform.type === 'boost' ? 2.5 : 1;
+      if (platform.type === 'MOVING') modifier = 1.5
       this.v.y = modifier * PUP.BOUNCE_SPEED;
       platform.falling = true;
       return true;
