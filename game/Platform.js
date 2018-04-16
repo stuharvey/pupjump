@@ -1,5 +1,5 @@
 import { Rectangle } from './util'
-import { PLAT } from './constants'
+import { PLAT,  } from './constants'
 
 const FALL_SPEED = 200;
 
@@ -27,7 +27,10 @@ export default class Platform extends Rectangle {
     if (this.type === PLAT.MOVING) {
       // handle horizontal translation
       const xMin = Math.max(0, this.xOrigin - this.travelDistance / 2)
-      const xMax = Math.min(state.screen.width, this.xOrigin + this.travelDistance / 2)
+      const xMax = Math.min(
+        state.screen.width - PLAT.WIDTH, 
+        this.xOrigin + this.travelDistance / 2
+      )
       this.left += PLAT.MOVE_SPEED * delta * this.xDir
       if (this.left < xMin) {
         this.left = xMin;
